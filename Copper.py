@@ -1,63 +1,161 @@
 import pandas as pd
 import numpy as np
-from sklearn.impute import SimpleImputer
-from sklearn.ensemble import IsolationForest
-from scipy.stats import skew
-from sklearn.preprocessing import PowerTransformer, OneHotEncoder, LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import LabelBinarizer
+import streamlit as st
+import re
 
-#####
+st.set_page_config(layout="wide")
 
-df = pd.read_excel("Copper_Set.xlsx")
+# st.write("""
+# <div style='text-align:center'>
+#     <h1 style='color:#5e17eb;'>Industrial Copper Modeling Application</h1>
+# </div>
+# """, unsafe_allow_html=True)
 
-# Drop irrelevant columns
-df.drop(columns=['INDEX'], inplace=True, errors='ignore')
+# tab1, tab2 = st.tabs(["PREDICT SELLING PRICE", "PREDICT STATUS"])
+# with tab1:
+#     # Define the possible values for the dropdown menus
+#     status_options = ['Won', 'Draft', 'To be approved', 'Lost', 'Not lost for AM', 'Wonderful', 'Revised', 'Offered',
+#                       'Offerable']
+#     item_type_options = ['W', 'WI', 'S', 'Others', 'PL', 'IPL', 'SLAWR']
+#     country_options = [28., 25., 30., 32., 38., 78., 27., 77., 113., 79., 26., 39., 40., 84., 80., 107., 89.]
+#     application_options = [10., 41., 28., 59., 15., 4., 38., 56., 42., 26., 27., 19., 20., 66., 29., 22., 40., 25., 67.,
+#                            79., 3., 99., 2., 5., 39., 69., 70., 65., 58., 68.]
+#     product = ['611112', '611728', '628112', '628117', '628377', '640400', '640405', '640665',
+#                '611993', '929423819', '1282007633', '1332077137', '164141591', '164336407',
+#                '164337175', '1665572032', '1665572374', '1665584320', '1665584642', '1665584662',
+#                '1668701376', '1668701698', '1668701718', '1668701725', '1670798778', '1671863738',
+#                '1671876026', '1690738206', '1690738219', '1693867550', '1693867563', '1721130331', '1722207579']
 
-# Convert 'material_ref' column values starting with '00000' to NaN
-df['material_ref'] = df['material_ref'].apply(lambda x: np.nan if str(x).startswith('00000') else x)
+#     # Define the widgets for user input
+#     with st.form("my_form"):
+#         col1, col2, col3 = st.columns([5, 2, 5])
+#         with col1:
+#             st.write(' ')
+#             status = st.selectbox("Status", status_options, key=1)
+#             item_type = st.selectbox("Item Type", item_type_options, key=2)
+#             country = st.selectbox("Country", sorted(country_options), key=3)
+#             application = st.selectbox("Application", sorted(application_options), key=4)
+#             product_ref = st.selectbox("Product Reference", product, key=5)
+#         with col3:
+#             st.write(
+#                 f'<h5 style="color:#ee4647;">NOTE: Min & Max given for reference, you can enter any value</h5>',
+#                 unsafe_allow_html=True)
+#             quantity_tons = st.text_input("Enter Quantity Tons (Min:611728 & Max:1722207579)")
+#             thickness = st.text_input("Enter thickness (Min:0.18 & Max:400)")
+#             width = st.text_input("Enter width (Min:1, Max:2990)")
+#             customer = st.text_input("customer ID (Min:12458, Max:30408185)")
+#             submit_button = st.form_submit_button(label="PREDICT SELLING PRICE")
+#             st.markdown("""
+#                     <style>
+#                     div.stButton > button:first-child {
+#                         background-color: #004aad;
+#                         color: white;
+#                         width: 100%;
+#                     }
+#                     </style>
+#                 """, unsafe_allow_html=True)
 
-# Define continuous and categorical columns
-continuous_cols = ['item_date', 'quantity tons', 'customer', 'country', 'application', 'thickness', 'width', 'product_ref', 'delivery date', 'selling_price']
-categorical_cols = ['id', 'status', 'item type', 'material_ref']
+#         flag = 0
+#         pattern = "^(?:\d+|\d*\.\d+)$"
+#         for i in [quantity_tons, thickness, width, customer]:
+#             if re.match(pattern, i):
+#                 pass
+#             else:
+#                 flag = 1
+#                 break
 
-# Display summary statistics for continuous columns
-for col in continuous_cols:
-    print(df[col].describe())
+#     if submit_button and flag == 1:
+#         if len(i) == 0:
+#             st.write("please enter a valid number space not allowed")
+#         else:
+#             st.write("You have entered an invalid value: ", i)
 
-# Display value counts for categorical columns
-for col in categorical_cols:
-    print(df[col].value_counts())
+#     if submit_button and flag == 0:
+#         import pickle
 
-#####
+#         with open(r"C:\\Users\\arunk\\OneDrive\\Desktop\\Data Science\\Project 5-Industrial Copper Modeling\\model.pkl", 'rb') as file:
+#             loaded_model = pickle.load(file)
+#         with open(r"C:\\Users\\arunk\\OneDrive\\Desktop\\Data Science\\Project 5-Industrial Copper Modeling\\scaler.pkl", 'rb') as f:
+#             scaler_loaded = pickle.load(f)
 
-# Separate numeric and categorical columns
-numeric_cols = df.select_dtypes(include=['number']).columns
-categorical_cols = df.select_dtypes(include=['object']).columns
-df[categorical_cols] = df[categorical_cols].astype(str)
+#         with open(r"C:\\Users\\arunk\\OneDrive\\Desktop\\Data Science\\Project 5-Industrial Copper Modeling\\t.pkl", 'rb') as f:
+#             t_loaded = pickle.load(f)
 
-# Handle missing values for numeric columns using mean imputation
-numeric_imputer = SimpleImputer(strategy='mean')
-df_filled_numeric = pd.DataFrame(numeric_imputer.fit_transform(df[numeric_cols]), columns=numeric_cols)
+#         with open(r"C:\\Users\\arunk\\OneDrive\\Desktop\\Data Science\\Project 5-Industrial Copper Modeling\\s.pkl", 'rb') as f:
+#             s_loaded = pickle.load(f)
 
-# Handle missing values for categorical columns using mode imputation
-categorical_imputer = SimpleImputer(strategy='most_frequent')
-df_filled_categorical = pd.DataFrame(categorical_imputer.fit_transform(df[categorical_cols]), columns=categorical_cols)
+#         new_sample = np.array([[np.log(float(quantity_tons)), application, np.log(float(thickness)), float(width),
+#                                 country, float(customer), int(product_ref), item_type, status]])
+#         new_sample_ohe = t_loaded.transform(new_sample[:, [7]]).toarray()
+#         new_sample_be = s_loaded.transform(new_sample[:, [8]]).toarray()
+#         new_sample = np.concatenate((new_sample[:, [0, 1, 2, 3, 4, 5, 6, ]], new_sample_ohe, new_sample_be), axis=1)
+#         new_sample1 = scaler_loaded.transform(new_sample)
+#         new_pred = loaded_model.predict(new_sample1)[0]
+#         st.write('## :green[Predicted selling price:] ', np.exp(new_pred))
 
-# Concatenate the filled numeric and categorical columns
-df_filled = pd.concat([df_filled_numeric, df_filled_categorical], axis=1)
+# with tab2:
+#     with st.form("my_form1"):
+#         col1, col2, col3 = st.columns([5, 1, 5])
+#         with col1:
+#             cquantity_tons = st.text_input("Enter Quantity Tons (Min:611728 & Max:1722207579)")
+#             cthickness = st.text_input("Enter thickness (Min:0.18 & Max:400)")
+#             cwidth = st.text_input("Enter width (Min:1, Max:2990)")
+#             ccustomer = st.text_input("customer ID (Min:12458, Max:30408185)")
+#             cselling = st.text_input("Selling Price (Min:1, Max:100001015)")
 
-# Apply log1p transformation to numeric columns
-skewed_cols = df_filled.select_dtypes(include=['float64']).columns
-for col in skewed_cols:
-    df_filled[col] = np.log1p(df_filled[col])
+#         with col3:
+#             st.write(' ')
+#             citem_type = st.selectbox("Item Type", item_type_options, key=21)
+#             ccountry = st.selectbox("Country", sorted(country_options), key=31)
+#             capplication = st.selectbox("Application", sorted(application_options), key=41)
+#             cproduct_ref = st.selectbox("Product Reference", product, key=51)
+#             csubmit_button = st.form_submit_button(label="PREDICT STATUS")
 
-# Preprocess categorical columns
-categorical_cols = df_filled.select_dtypes(include=['object']).columns
-# Limit the number of categories for one-hot encoding
-top_categories = 10  # Set the number of top categories to include
-for col in categorical_cols:
-    top_categories_values = df_filled[col].value_counts().index[:top_categories]
-    df_filled[col] = df_filled[col].apply(lambda x: x if x in top_categories_values else 'Other')
-    df_filled = pd.get_dummies(df_filled, columns=[col], drop_first=True)
+#         cflag = 0
+#         pattern = "^(?:\d+|\d*\.\d+)$"
+#         for k in [cquantity_tons, cthickness, cwidth, ccustomer, cselling]:
+#             if re.match(pattern, k):
+#                 pass
+#             else:
+#                 cflag = 1
+#                 break
 
+#     if csubmit_button and cflag == 1:
+#         if len(k) == 0:
+#             st.write("please enter a valid number space not allowed")
+#         else:
+#             st.write("You have entered an invalid value: ", k)
 
-#####
+#     if csubmit_button and cflag == 0:
+#         import pickle
+
+#         with open(r"C:\\Users\\arunk\\OneDrive\\Desktop\\Data Science\\Project 5-Industrial Copper Modeling\\clsmodel.pkl", 'rb') as file:
+#             cloaded_model = pickle.load(file)
+
+#         with open(r"C:\\Users\\arunk\\OneDrive\\Desktop\\Data Science\\Project 5-Industrial Copper Modeling\\cscaler.pkl", 'rb') as f:
+#             cscaler_loaded = pickle.load(f)
+
+#         with open(r"C:\\Users\\arunk\\OneDrive\\Desktop\\Data Science\\Project 5-Industrial Copper Modeling\\ct.pkl", 'rb') as f:
+#             ct_loaded = pickle.load(f)
+
+#         # Predict the status for a new sample
+#         # 'quantity tons_log', 'selling_price_log','application', 'thickness_log', 'width','country','customer','product_ref']].values, X_ohe
+#         new_sample = np.array([[np.log(float(cquantity_tons)), np.log(float(cselling)), capplication,
+#                                 np.log(float(cthickness)), float(cwidth), ccountry, int(ccustomer), int(product_ref),
+#                                 citem_type]])
+#         new_sample_ohe = ct_loaded.transform(new_sample[:, [8]]).toarray()
+#         new_sample = np.concatenate((new_sample[:, [0, 1, 2, 3, 4, 5, 6, 7]], new_sample_ohe), axis=1)
+#         new_sample = cscaler_loaded.transform(new_sample)
+#         new_pred = cloaded_model.predict(new_sample)
+#         if new_pred == 1:
+#             st.write('## :green[The Status is Won] ')
+#         else:
+#             st.write('## :red[The status is Lost] ')
+
+# st.write(f'<h6 style="color:#ee4647;">App Created by Arunkumar Bairavan</h6>', unsafe_allow_html=True)
