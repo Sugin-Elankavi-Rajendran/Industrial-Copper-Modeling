@@ -11,11 +11,11 @@ import re
 
 st.set_page_config(layout="wide")
 
-# st.write("""
-# <div style='text-align:center'>
-#     <h1 style='color:#5e17eb;'>Industrial Copper Modeling Application</h1>
-# </div>
-# """, unsafe_allow_html=True)
+st.write("""
+<div style='text-align:center; background-color:#f0f0f0; padding: 20px; border-radius: 10px;'>
+    <h1 style='color:#5e17eb; font-family:Arial, sans-serif; font-size:36px;'>Industrial Copper Modeling Application</h1>
+</div>
+""", unsafe_allow_html=True)
 
 # tab1, tab2 = st.tabs(["PREDICT SELLING PRICE", "PREDICT STATUS"])
 # with tab1:
