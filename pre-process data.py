@@ -26,3 +26,7 @@ df['product_ref'] = pd.to_numeric(df['product_ref'], errors='coerce')
 df['delivery date'] = pd.to_datetime(df['delivery date'], format='%Y%m%d', errors='coerce').dt.date
 df['selling_price'] = pd.to_numeric(df['selling_price'], errors='coerce')
 
+missing_values_count = df.isnull().sum()
+print(missing_values_count)
+print(df.shape)
+df.info()
