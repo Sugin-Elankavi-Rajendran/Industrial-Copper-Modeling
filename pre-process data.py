@@ -33,7 +33,7 @@ missing_values_count = df.isnull().sum()
 # print(df.shape)
 df.info()
 
-df['material_ref'].fillna('unknown', inplace=True)
+df['material_ref'] = df['material_ref'].fillna('unknown')
 
 df = df.dropna()
 
@@ -43,7 +43,7 @@ missing_values_count = df.isnull().sum()
 
 df_copy=df.copy()
 
-sns.histplot(df_copy['quantity tons'],, kde=True)
+sns.histplot(df_copy['quantity tons'], kde=True)
 plt.show()
 sns.histplot(df_copy['country'], kde=True)
 plt.show()
