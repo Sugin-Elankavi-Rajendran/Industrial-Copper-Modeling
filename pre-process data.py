@@ -31,7 +31,7 @@ df['selling_price'] = pd.to_numeric(df['selling_price'], errors='coerce')
 missing_values_count = df.isnull().sum()
 # print(missing_values_count)
 # print(df.shape)
-df.info()
+# df.info()
 
 df['material_ref'] = df['material_ref'].fillna('unknown')
 
