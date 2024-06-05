@@ -36,5 +36,7 @@ df['material_ref'].fillna('unknown', inplace=True)
 df = df.dropna()
 
 missing_values_count = df.isnull().sum()
-print(missing_values_count)
-print(df.shape)
+# print(missing_values_count)
+# print(df.shape)
+
+df_copy=df.copy()
