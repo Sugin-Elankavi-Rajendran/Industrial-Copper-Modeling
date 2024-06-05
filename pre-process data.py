@@ -8,3 +8,6 @@ df = pd.read_excel("Copper_Set.xlsx")
 # print(len(df['material_ref'].unique()))
 # print(len(df['product_ref'].unique())) 
 # print(len(df['delivery date'].unique())) 
+
+missing_values = df.isnull().sum()
+print(missing_values)
