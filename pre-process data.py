@@ -34,3 +34,7 @@ df.info()
 df['material_ref'].fillna('unknown', inplace=True)
 
 df = df.dropna()
+
+missing_values_count = df.isnull().sum()
+print(missing_values_count)
+print(df.shape)
