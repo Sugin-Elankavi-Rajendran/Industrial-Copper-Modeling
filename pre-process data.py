@@ -10,4 +10,6 @@ df = pd.read_excel("Copper_Set.xlsx")
 # print(len(df['delivery date'].unique())) 
 
 missing_values = df.isnull().sum()
-print(missing_values)
+# print(missing_values)
+
+print(df.info())
