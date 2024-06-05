@@ -12,4 +12,17 @@ df = pd.read_excel("Copper_Set.xlsx")
 missing_values = df.isnull().sum()
 # print(missing_values)
 
-print(df.info())
+# print(df.info())
+
+df['item_date'] = pd.to_datetime(df['item_date'], format='%Y%m%d', errors='coerce').dt.date
+df['quantity tons'] = pd.to_numeric(df['quantity tons'], errors='coerce')
+df['customer'] = pd.to_numeric(df['customer'], errors='coerce')
+df['country'] = pd.to_numeric(df['country'], errors='coerce')
+df['application'] = pd.to_numeric(df['application'], errors='coerce')
+df['thickness'] = pd.to_numeric(df['thickness'], errors='coerce')
+df['width'] = pd.to_numeric(df['width'], errors='coerce')
+df['material_ref'] = df['material_ref'].str.lstrip('0')
+df['product_ref'] = pd.to_numeric(df['product_ref'], errors='coerce')
+df['delivery date'] = pd.to_datetime(df['delivery date'], format='%Y%m%d', errors='coerce').dt.date
+df['selling_price'] = pd.to_numeric(df['selling_price'], errors='coerce')
+
