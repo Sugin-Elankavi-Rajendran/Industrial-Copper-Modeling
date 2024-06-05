@@ -1,4 +1,6 @@
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 df = pd.read_excel("Copper_Set.xlsx")
 #print(df.head(2))
@@ -40,3 +42,16 @@ missing_values_count = df.isnull().sum()
 # print(df.shape)
 
 df_copy=df.copy()
+
+sns.histplot(df_copy['quantity tons'],, kde=True)
+plt.show()
+sns.histplot(df_copy['country'], kde=True)
+plt.show()
+sns.histplot(df_copy['application'], kde=True)
+plt.show()
+sns.histplot(df_copy['thickness'], kde=True)
+plt.show()
+sns.histplot(df_copy['width'], kde=True)
+plt.show()
+sns.histplot(df_copy['selling_price'], kde=True)
+plt.show()
