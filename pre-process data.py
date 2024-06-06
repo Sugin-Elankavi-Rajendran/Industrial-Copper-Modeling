@@ -72,16 +72,22 @@ mask1 = df['thickness'] <= 0
 df.dropna(inplace=True)
 # print(len(df))
 
-df_sample = df.sample(frac=0.2, random_state=42)
+# df_sample = df.sample(frac=0.2, random_state=42)
 
-df_sample['selling_price_log'] = np.log(df_sample['selling_price'])
-sns.histplot(df_sample['selling_price_log'], kde=True)
-plt.show()
+# df_sample['selling_price_log'] = np.log(df_sample['selling_price'])
+# sns.histplot(df_sample['selling_price_log'], kde=True)
+# plt.show()
 
-df_sample['quantity tons_log'] = np.log(df_sample['quantity tons'])
-sns.histplot(df_sample['quantity tons_log'], kde=True)
-plt.show()
+# df_sample['quantity tons_log'] = np.log(df_sample['quantity tons'])
+# sns.histplot(df_sample['quantity tons_log'], kde=True)
+# plt.show()
 
-df_sample['thickness_log'] = np.log(df_sample['thickness'])
-sns.histplot(df_sample['thickness_log'], kde=True)
-plt.show()
+# df_sample['thickness_log'] = np.log(df_sample['thickness'])
+# sns.histplot(df_sample['thickness_log'], kde=True)
+# plt.show()
+
+# print(df.head())
+
+x=df[['quantity tons_log','application','thickness_log','width','selling_price_log','country','customer','product_ref']].corr()
+
+sns.heatmap(x, annot=True, cmap="YlGnBu")
