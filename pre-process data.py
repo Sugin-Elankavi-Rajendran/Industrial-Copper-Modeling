@@ -10,6 +10,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc
+import pickle
 
 
 df = pd.read_excel("Copper_Set.xlsx")
@@ -155,7 +156,6 @@ new_pred = best_model.predict(new_sample_scaled)
 
 # print('Predicted selling price:', np.exp(new_pred))
 
-import pickle
 with open('model.pkl', 'wb') as file:
     pickle.dump(best_model, file)
 with open('scaler.pkl', 'wb') as f:
@@ -174,36 +174,37 @@ df_c = df_sample[df_sample['status'].isin(['Won', 'Lost'])]
 ################################################################################
 
 Y = df_c['status']
-X= df_c[['quantity tons_log','selling_price_log','item type','application','thickness_log','width','country','customer','product_ref']]
+X = df_c[['quantity tons_log', 'selling_price_log', 'item type', 'application', 'thickness_log', 'width', 'country', 'customer', 'product_ref']]
 
-ohe = OneHotEncoder(handle_unknown='ignore')
-ohe.fit(X[['item type']])
-X_ohe = ohe.fit_transform(X[['item type']]).toarray()
-be = LabelBinarizer()
-be.fit(Y) 
-y = be.fit_transform(Y)
+ohe_item_type = OneHotEncoder(handle_unknown='ignore')
+ohe_item_type.fit(X[['item type']])
+X_ohe_item_type = ohe_item_type.transform(X[['item type']]).toarray()
 
-X = np.concatenate((X[['quantity tons_log', 'selling_price_log','application', 'thickness_log', 'width','country','customer','product_ref']].values, X_ohe), axis=1)
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
+lb = LabelBinarizer()
+Y_bin = lb.fit_transform(Y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X = np.concatenate((X[['quantity tons_log', 'selling_price_log', 'application', 'thickness_log', 'width', 'country', 'customer', 'product_ref']].values, X_ohe_item_type), axis=1)
+
+scaler_clf = StandardScaler()
+X = scaler_clf.fit_transform(X)
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y_bin, test_size=0.2, random_state=42)
 
 dtc = DecisionTreeClassifier()
-dtc.fit(X_train, y_train)
-y_pred = dtc.predict(X_test)
+dtc.fit(X_train, Y_train)
+Y_pred = dtc.predict(X_test)
 
-accuracy = accuracy_score(y_test, y_pred)
+accuracy = accuracy_score(Y_test, Y_pred)
 # print(f"Accuracy: {accuracy}")
-cm = confusion_matrix(y_test, y_pred)
+cm = confusion_matrix(Y_test, Y_pred)
 # print(f"Confusion Matrix:\n{cm}")
 
-print("Confusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
-print("Classification Report:")
-print(classification_report(y_test, y_pred))
-# ROC curve and AUC
-fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+# print("Confusion Matrix:")
+# print(confusion_matrix(Y_test, Y_pred))
+# print("Classification Report:")
+# print(classification_report(Y_test, Y_pred))
+
+fpr, tpr, thresholds = roc_curve(Y_test, Y_pred)
 roc_auc = auc(fpr, tpr)
 plt.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
 plt.plot([0, 1], [0, 1], 'k--')
@@ -211,6 +212,26 @@ plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
-plt.title('Receiver operating characteristic')
+plt.title('Receiver Operating Characteristic')
 plt.legend(loc="lower right")
-plt.show()
+# plt.show()
+
+new_sample_data = pd.DataFrame([[np.log(700), np.log(956), 10, np.log(2), 1500, 28.0, 30202938, 1670798778, 'W']],
+                               columns=['quantity tons_log', 'selling_price_log', 'application', 'thickness_log', 'width', 'country', 'customer', 'product_ref', 'item type'])
+
+new_sample_ohe_item_type = ohe_item_type.transform(new_sample_data[['item type']]).toarray()
+
+new_sample_combined = np.concatenate((new_sample_data[['quantity tons_log', 'selling_price_log', 'application', 'thickness_log', 'width', 'country', 'customer', 'product_ref']].values, new_sample_ohe_item_type), axis=1)
+
+new_sample_scaled = scaler_clf.transform(new_sample_combined)
+
+new_pred_class = dtc.predict(new_sample_scaled)
+status_prediction = 'Won' if new_pred_class[0] == 1 else 'Lost'
+print(f'The status is: {status_prediction}')
+
+with open('cmodel.pkl', 'wb') as file:
+    pickle.dump(dtc, file)
+with open('cscaler.pkl', 'wb') as f:
+    pickle.dump(scaler_clf, f)
+with open('ct.pkl', 'wb') as f:
+    pickle.dump(ohe_item_type, f)
