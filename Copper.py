@@ -173,4 +173,21 @@ with tab2:
                 st.write('## :red[The Status is Lost]')
 
 # Footer with creator information
-st.write(f'<h6 style="color:rgb(0, 153, 153,0.35);">App Created by Sugin Elankavi</h6>', unsafe_allow_html=True)
+# Inject custom CSS for styling
+st.markdown(
+    """
+    <style>
+    .custom-text {
+        color: #333;  /* Dark color for the text */
+        font-weight: bold;
+        font-family: 'Arial', sans-serif;  /* Choose a stylish font */
+        font-size: 20px;  /* Adjust the font size */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Write the HTML with the custom CSS class
+st.write(f'<p class="custom-text">App Created by Sugin Elankavi</p>', unsafe_allow_html=True)
+
