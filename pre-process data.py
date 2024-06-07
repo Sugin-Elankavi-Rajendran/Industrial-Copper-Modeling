@@ -138,3 +138,16 @@ r2 = r2_score(y_test, y_pred)
 # print('Mean squared error:', mse)
 # print('R-squared:', r2)
 
+new_sample = pd.DataFrame([[np.log(40), 'Won', 'PL', 10, np.log(250), 0, 28, 30202938, 1670798778]], 
+                          columns=['quantity tons_log', 'status', 'item type', 'application', 'thickness_log', 'width', 'country', 'customer', 'product_ref'])
+
+new_sample_ohe = ohe.transform(new_sample[['item type']]).toarray()
+new_sample_be = ohe2.transform(new_sample[['status']]).toarray()
+new_sample_combined = np.concatenate((new_sample[['quantity tons_log', 'application', 'thickness_log', 'width', 'country', 'customer', 'product_ref']].values, new_sample_ohe, new_sample_be), axis=1)
+
+new_sample_scaled = scaler.transform(new_sample_combined)
+
+new_pred = best_model.predict(new_sample_scaled)
+
+# print('Predicted selling price:', np.exp(new_pred))
+
