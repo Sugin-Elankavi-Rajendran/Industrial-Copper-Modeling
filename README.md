@@ -58,7 +58,6 @@ Ensure you have the following Python libraries installed:
 
 You can install these using pip:
 
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML
 ```
    pip install pandas numpy seaborn matplotlib scikit-learn streamlit
 ```
@@ -162,8 +161,11 @@ Usage
     
 3.  Place the required data files in the appropriate directories.
     
-4.  shCopy codestreamlit run app.py
-    
+4.  Run the Streamlit application using the following command:
+```
+streamlit run app.py
+```
+   
 5.  Use the web interface to input data and get predictions.
     
 
