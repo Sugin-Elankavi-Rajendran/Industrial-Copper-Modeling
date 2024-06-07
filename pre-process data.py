@@ -10,7 +10,11 @@ import pickle
 
 # Load the dataset
 df = pd.read_excel("Copper_Set.xlsx")
+<<<<<<< HEAD
 print(df.head(2))
+=======
+#print(df.head(2))
+>>>>>>> parent of ea45c53 (Heatmap done)
 
 # Basic data exploration
 print(len(df['item_date'].unique())) 
@@ -19,7 +23,12 @@ print(len(df['material_ref'].unique()))
 print(len(df['product_ref'].unique())) 
 print(len(df['delivery date'].unique())) 
 
+<<<<<<< HEAD
 # Data cleaning and type conversion
+=======
+# print(df.info())
+
+>>>>>>> parent of ea45c53 (Heatmap done)
 df['item_date'] = pd.to_datetime(df['item_date'], format='%Y%m%d', errors='coerce').dt.date
 df['quantity tons'] = pd.to_numeric(df['quantity tons'], errors='coerce', downcast='float')
 df['customer'] = pd.to_numeric(df['customer'], errors='coerce', downcast='integer')
@@ -32,10 +41,19 @@ df['product_ref'] = pd.to_numeric(df['product_ref'], errors='coerce', downcast='
 df['delivery date'] = pd.to_datetime(df['delivery date'], format='%Y%m%d', errors='coerce').dt.date
 df['selling_price'] = pd.to_numeric(df['selling_price'], errors='coerce', downcast='float')
 
+<<<<<<< HEAD
 # Handle missing values
-df['material_ref'] = df['material_ref'].fillna('unknown')
-df.dropna(inplace=True)
+=======
+missing_values_count = df.isnull().sum()
+# print(missing_values_count)
+# print(df.shape)
+# df.info()
 
+>>>>>>> parent of ea45c53 (Heatmap done)
+df['material_ref'] = df['material_ref'].fillna('unknown')
+df = df.dropna()
+
+<<<<<<< HEAD
 # Remove rows where 'selling_price' or other essential columns are NaN
 df.dropna(subset=['selling_price'], inplace=True)
 
@@ -122,3 +140,59 @@ with open('ohe_item_type.pkl', 'wb') as f:
     pickle.dump(ohe_item_type, f)
 with open('ohe_status.pkl', 'wb') as f:
     pickle.dump(ohe_status, f)
+=======
+missing_values_count = df.isnull().sum()
+# print(missing_values_count)
+# print(df.shape)
+
+# df_sample = df.sample(frac=0.2, random_state=42)
+
+# sns.histplot(df_sample['quantity tons'], kde=True)
+# plt.show()
+# sns.histplot(df_sample['country'], kde=True)
+# plt.show()
+# sns.histplot(df_sample['application'], kde=True)
+# plt.show()
+# sns.histplot(df_sample['thickness'], kde=True)
+# plt.show()
+# sns.histplot(df_sample['width'], kde=True)
+# plt.show()
+# sns.histplot(df_sample['selling_price'], kde=True)
+# plt.show()
+
+mask1 = df['selling_price'] <= 0
+# print(mask1.sum())
+df.loc[mask1, 'selling_price'] = np.nan
+
+mask1 = df['quantity tons'] <= 0
+# print(mask1.sum())
+df.loc[mask1, 'quantity tons'] = np.nan
+
+mask1 = df['thickness'] <= 0
+# print(mask1.sum())
+
+# df.isnull().sum()
+
+df.dropna(inplace=True)
+# print(len(df))
+
+# df_sample = df.sample(frac=0.2, random_state=42)
+
+# df_sample['selling_price_log'] = np.log(df_sample['selling_price'])
+# sns.histplot(df_sample['selling_price_log'], kde=True)
+# plt.show()
+
+# df_sample['quantity tons_log'] = np.log(df_sample['quantity tons'])
+# sns.histplot(df_sample['quantity tons_log'], kde=True)
+# plt.show()
+
+# df_sample['thickness_log'] = np.log(df_sample['thickness'])
+# sns.histplot(df_sample['thickness_log'], kde=True)
+# plt.show()
+
+# print(df.head())
+
+x=df[['quantity tons_log','application','thickness_log','width','selling_price_log','country','customer','product_ref']].corr()
+
+sns.heatmap(x, annot=True, cmap="YlGnBu")
+>>>>>>> parent of ea45c53 (Heatmap done)
