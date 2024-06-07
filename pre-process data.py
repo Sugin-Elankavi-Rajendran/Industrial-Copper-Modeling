@@ -4,9 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder,LabelBinarizer
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc
+
 
 df = pd.read_excel("Copper_Set.xlsx")
 # print(df.head(2))
@@ -161,9 +165,52 @@ with open('t.pkl', 'wb') as f:
 with open('s.pkl', 'wb') as f:
     pickle.dump(ohe2, f)
 
-print(len(df_sample))
-print(df_sample.head(3))
+# print(len(df_sample))
+# print(df_sample.head(3))
 
 df_c = df_sample[df_sample['status'].isin(['Won', 'Lost'])]
-print(len(df_c))
+# print(len(df_c))
 
+################################################################################
+
+Y = df_c['status']
+X= df_c[['quantity tons_log','selling_price_log','item type','application','thickness_log','width','country','customer','product_ref']]
+
+ohe = OneHotEncoder(handle_unknown='ignore')
+ohe.fit(X[['item type']])
+X_ohe = ohe.fit_transform(X[['item type']]).toarray()
+be = LabelBinarizer()
+be.fit(Y) 
+y = be.fit_transform(Y)
+
+X = np.concatenate((X[['quantity tons_log', 'selling_price_log','application', 'thickness_log', 'width','country','customer','product_ref']].values, X_ohe), axis=1)
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+dtc = DecisionTreeClassifier()
+dtc.fit(X_train, y_train)
+y_pred = dtc.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+# print(f"Accuracy: {accuracy}")
+cm = confusion_matrix(y_test, y_pred)
+# print(f"Confusion Matrix:\n{cm}")
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+# ROC curve and AUC
+fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+roc_auc = auc(fpr, tpr)
+plt.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.show()
