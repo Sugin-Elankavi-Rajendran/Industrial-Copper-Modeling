@@ -151,3 +151,19 @@ new_pred = best_model.predict(new_sample_scaled)
 
 # print('Predicted selling price:', np.exp(new_pred))
 
+import pickle
+with open('model.pkl', 'wb') as file:
+    pickle.dump(best_model, file)
+with open('scaler.pkl', 'wb') as f:
+    pickle.dump(scaler, f)
+with open('t.pkl', 'wb') as f:
+    pickle.dump(ohe, f)
+with open('s.pkl', 'wb') as f:
+    pickle.dump(ohe2, f)
+
+print(len(df_sample))
+print(df_sample.head(3))
+
+df_c = df_sample[df_sample['status'].isin(['Won', 'Lost'])]
+print(len(df_c))
+
