@@ -2,9 +2,14 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import GridSearchCV
 
 df = pd.read_excel("Copper_Set.xlsx")
-#print(df.head(2))
+# print(df.head(2))
 
 # print(len(df['item_date'].unique())) 
 # print(len(df['customer'].unique())) 
@@ -35,13 +40,13 @@ missing_values_count = df.isnull().sum()
 # df.info()
 
 df['material_ref'] = df['material_ref'].fillna('unknown')
-df = df.dropna()
+# df = df.dropna()
 
 missing_values_count = df.isnull().sum()
 # print(missing_values_count)
 # print(df.shape)
 
-# df_sample = df.sample(frac=0.2, random_state=42)
+df_sample = df.sample(frac=0.2, random_state=42)
 
 # sns.histplot(df_sample['quantity tons'], kde=True)
 # plt.show()
@@ -72,23 +77,64 @@ mask1 = df['thickness'] <= 0
 df.dropna(inplace=True)
 # print(len(df))
 
-# df_sample = df.sample(frac=0.2, random_state=42)
+df_sample = df.sample(frac=0.2, random_state=42)
 
-# df_sample['selling_price_log'] = np.log(df_sample['selling_price'])
+df_sample['selling_price_log'] = np.log(df_sample['selling_price'])
 # sns.histplot(df_sample['selling_price_log'], kde=True)
 # plt.show()
 
-# df_sample['quantity tons_log'] = np.log(df_sample['quantity tons'])
+df_sample['quantity tons_log'] = np.log(df_sample['quantity tons'])
 # sns.histplot(df_sample['quantity tons_log'], kde=True)
 # plt.show()
 
-# df_sample['thickness_log'] = np.log(df_sample['thickness'])
+df_sample['thickness_log'] = np.log(df_sample['thickness'])
 # sns.histplot(df_sample['thickness_log'], kde=True)
 # plt.show()
 
-# print(df.head())
+# print(df_sample.head())
 
-x=df[['quantity tons_log','application','thickness_log','width','selling_price_log','country','customer','product_ref']].corr()
+# x = df_sample[['quantity tons_log', 'application', 'thickness_log', 'width', 'selling_price_log', 'country', 'customer', 'product_ref']].corr()
 
-sns.heatmap(x, annot=True, cmap='viridis', center=0) 
-plt.show()
+# sns.heatmap(x, annot=True, cmap='viridis', center=0) 
+# plt.show()
+
+##########################################################################
+
+X=df_sample[['quantity tons_log','status','item type','application','thickness_log','width','country','customer','product_ref']]
+y=df_sample['selling_price_log']
+
+ohe = OneHotEncoder(handle_unknown='ignore')
+ohe.fit(X[['item type']])
+X_ohe = ohe.fit_transform(X[['item type']]).toarray()
+ohe2 = OneHotEncoder(handle_unknown='ignore')
+ohe2.fit(X[['status']])
+X_be = ohe2.fit_transform(X[['status']]).toarray()
+
+X = np.concatenate((X[['quantity tons_log', 'application', 'thickness_log', 'width','country','customer','product_ref']].values, X_ohe, X_be), axis=1)
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+
+dtr = DecisionTreeRegressor()
+
+param_grid = {
+    'max_depth': [None, 10, 20, 30],
+    'max_features': ['sqrt', 'log2', None],  
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
+
+grid_search = GridSearchCV(estimator=dtr, param_grid=param_grid, cv=5)
+grid_search.fit(X_train, y_train)
+
+# print("Best hyperparameters:", grid_search.best_params_)
+
+best_model = grid_search.best_estimator_
+y_pred = best_model.predict(X_test)
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+# print('Mean squared error:', mse)
+# print('R-squared:', r2)
+
