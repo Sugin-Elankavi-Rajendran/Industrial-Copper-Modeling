@@ -227,7 +227,7 @@ new_sample_scaled = scaler_clf.transform(new_sample_combined)
 
 new_pred_class = dtc.predict(new_sample_scaled)
 status_prediction = 'Won' if new_pred_class[0] == 1 else 'Lost'
-print(f'The status is: {status_prediction}')
+# print(f'The status is: {status_prediction}')
 
 with open('cmodel.pkl', 'wb') as file:
     pickle.dump(dtc, file)
