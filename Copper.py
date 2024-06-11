@@ -23,7 +23,7 @@ st.markdown(
     }
     /* Style the main container to make sure content is visible above the background */
     .stApp {
-        background-color: rgba(255, 255, 255, 0.4); /* Optional: adds a slight white background to text for better readability */
+        background-color: rgba(255, 255, 255, 0.6); /* Optional: adds a slight white background to text for better readability */
         border-radius: 15px;
         padding: 20px;
         margin: auto;
@@ -84,7 +84,7 @@ with tab1:
             application = st.selectbox("Application", sorted(application_options), key=4)
             product_ref = st.selectbox("Product Reference", products, key=5)
         with col3:
-            st.write(f'<h5 style="color:rgb(0, 153, 153,0.4);">NOTE: Min & Max values are provided for reference.</h5>', unsafe_allow_html=True)
+            st.write(f'<h5 style="color:rgb(0, 0, 255,0.6);">NOTE: Min & Max values are provided for reference.</h5>', unsafe_allow_html=True)
             quantity_tons = st.text_input("Enter Quantity Tons (Min: 611728, Max: 1722207579)")
             thickness = st.text_input("Enter Thickness (Min: 0.18, Max: 400)")
             width = st.text_input("Enter Width (Min: 1, Max: 2990)")
